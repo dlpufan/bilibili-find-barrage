@@ -16,10 +16,10 @@
 
 <body>
 
-  <div class="main">
+  <div class="main" id="main_div">
     <div class="title" style="text-align:center;">
       <h1>bilibili弹幕查询工具</h1>
-
+	<span>设置颜色：</span><input type="color" id="color_div" oninput="changeColor()"/>
     </div>
     <div class="postDiv">
       <div class="video1">
@@ -39,12 +39,13 @@
         </div>
       </div>
       <div class="buttonDiv"><button id="toFind" onclick="toFind()">查询</button></div>
-      <div style="text-align:center;"><span>由于当前数据库数据较少，故采用暴力破解获取用户uid，等待时间可能过长(一条数据1秒左右)，请确认关键字以减少搜索时间，敬请谅解</span>
+      <div style="text-align:center;"><span>我做了一次更新，现在能查到一条弹幕对应的多个用户了，但是代价是我重新做了一遍数据库，所以最近查询速度会有所下降。</span>
       </div>
       <div style="text-align:center;"><span id="allCount">总访问数:</span></div>
     </div>
   </div>
-  <div class="userInfor" id="tbDiv">
+  <div class="userInfor" id="tbDiv" style="display:none;">
+   <p id="tbDivUseTime" style="text-align:center;"></p>
     <table border="1" width="95%" style="margin:20px 0 20px 2.5%; ">
       <tbody id="usTable">
 
@@ -59,7 +60,15 @@
 
 
   <script>
+$("#color_div").val(localStorage.getItem("fybgameColor")?localStorage.getItem("fybgameColor"):"#86ffef");
+changeColor();
+function changeColor(){
+$("#main_div").css("background",$("#color_div").val());
+$("#tbDiv").css("background",$("#color_div").val());
+localStorage.setItem("fybgameColor",$("#color_div").val());
+	}
 var isClick = false;
+
 document.onkeydown = function (event) {
         var e = event || window.event;
         if (e && e.keyCode == 13) { 
@@ -174,18 +183,35 @@ if(!isClick){
               },
               dataType: "json",
               success: function (result) {
+		
+		$("#tbDiv").css("display","block");
+		$("#tbDivUseTime").html("视频AV号："+'<a href=\"https://www.bilibili.com/video/av' + aid +(pInputCount==1?'':'?p='+pInputCount)+ '\"' +
+                    ' target=\"_blank\">'+aid +
+                    '</a></p>'+"\t查询到"+result.msg['id']['one'].length+"个结果 "+"\t总耗时:"+result.msg['useTime']);
                 var key = $('#keyword').val()
                 var str =
-                  "<tr> <td width='5%'>总数</td><td width='48%'>用户发送弹幕</td><td width='7%'>视频中的位置</td><td>发送时间</td><td width='27%'>用户信息</td></tr>"
-                for (var i = 0; i < result.msg['id'].length; i++) {
+                  "<tr> <td width='10%'>总数</td><td width='40%'>用户发送弹幕</td><td width='7%'>视频中的位置</td><td>发送时间</td><td width='27%'>用户信息</td></tr>"
+                for (var i = 0; i < result.msg['id']['one'].length; i++) {
+		var two = "";
+		var three = "";
+		if(result.msg['id']['two'][i]!=null){
+			two = '或<p><a href=\"https://space.bilibili.com/' + result.msg['id']['two'][i] + '\"' +
+                    ' target=\"_blank\">https://space.bilibili.com/' + result.msg['id']['two'][i] +
+                    '</a></p>';
+			if(result.msg['id']['three'][i]!=null){
+			three = '或<p><a href=\"https://space.bilibili.com/' + result.msg['id']['three'][i] + '\"' +
+                    ' target=\"_blank\">https://space.bilibili.com/' + result.msg['id']['three'][i] +
+                    '</a></p>';
+			}
+		}
                   str += ('<tr><td>' + (i + 1) + '</td><td>' + result.msg['barrage'][i].replace(new RegExp(
                       key,
                       "gm"), "<span style='color:red;'>" + $('#keyword').val() + "</span>") +
                     '</td><td>' + s_to_hs(result.msg['videoTime'][i]) +'</td><td>' + getLocalTime(result.msg['time'][i]) + '</td><td>' +
-                    '<a href=\"https://space.bilibili.com/' + result.msg['id'][i] + '\"' +
-                    ' target=\"_blank\">https://space.bilibili.com/' + result.msg['id'][i] +
-                    '</a></td></tr>');
-
+                    '<p><a href=\"https://space.bilibili.com/' + result.msg['id']['one'][i] + '\"' +
+                    ' target=\"_blank\">https://space.bilibili.com/' + result.msg['id']['one'][i] +
+                    '</a></p>'+two+three+'</td></tr>');
+		
                 }
                 $('#usTable').html(str);
                 $("#toFind").html('查找');

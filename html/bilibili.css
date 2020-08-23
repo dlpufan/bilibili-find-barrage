@@ -16,8 +16,17 @@ p{
     margin-left: 10px;
     font-size: 15px;
   }
+
+#color_div{
+margin:0;
+padding:0;
+border:0;
+width:20px;
+height:20px;
+border-radius:0px;
+}
   .main,.userInfor{
-    background: rgba(134, 255, 239,0.6);
+    
     width:800px;
     margin: 0 auto;
     border-radius: 30px;
@@ -41,7 +50,7 @@ p{
     width:40px;
 }
 .spanDiv{
-    width:130px;
+    width:150px;
 }
 .postDiv div{
     margin-top: 10px;

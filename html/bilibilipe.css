@@ -6,6 +6,15 @@ td{
   word-break:break-all;
   overflow: hidden;
 }
+#color_div{
+margin:0;
+padding:0;
+border:0;
+width:20px;
+height:20px;
+border-radius:0px;
+}
+
 input{
   padding-left: 3px;
   width:300px;
