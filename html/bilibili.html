@@ -3,252 +3,252 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport"
-    content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
-  <title>bilibili弹幕查询工具</title>
-  <style>
-  </style>
-  <script type="text/javascript" src="../js/jquery-3.4.1.min.js"></script>
-  <link rel="stylesheet" type="text/css" media="screen and (min-width:600px)" href="bilibili.css" />
-  <link rel="stylesheet" type="text/css" media="screen and (max-device-width: 600px)" href="bilibilipe.css" />
+    <meta charset="utf-8" />
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+    <title>bilibili弹幕查询工具</title>
+    <style>
+    </style>
+    <script type="text/javascript" src="../js/jquery-3.4.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" media="screen and (min-width:600px)" href="bilibili.css" />
+    <link rel="stylesheet" type="text/css" media="screen and (max-device-width: 600px)" href="bilibilipe.css" />
 </head>
 
 <body>
 
-  <div class="main" id="main_div">
-    <div class="title" style="text-align:center;">
-      <h1>bilibili弹幕查询工具</h1>
-	<span>设置颜色：</span><input type="color" id="color_div" oninput="changeColor()"/>
+    <div class="main" id="main_div">
+        <div class="title" style="text-align:center;">
+            <h1>bilibili弹幕查询工具</h1>
+            <span>设置颜色：</span><input type="color" id="color_div" oninput="changeColor()" />
+        </div>
+        <div class="postDiv">
+            <div class="video1">
+                <div class="avbvInput">
+                    <div class="spanDiv"><span>AV号或BV号</span></div>
+                    <input placeholder="例如170001或BV17x411w7KC" id="videoID" value="" />
+                </div>
+                <div class="pInputDiv">
+                    <div class="spanDiv"><span>第几P（默认为1）</span></div>
+                    <input id="pInput" value="" />
+                </div>
+            </div>
+            <div class="video2">
+                <div class="keyWords">
+                    <div class="spanDiv"><span>关键字</span></div>
+                    <input placeholder="下次一定(然而没有人在170001里发下次一定)" id="keyword" value="" />
+                </div>
+            </div>
+            <div class="buttonDiv"><button id="toFind" onclick="toFind()">查询</button></div>
+            <div style="text-align:center;">
+                <span>我做了一次更新，现在能查到一条弹幕对应的多个用户了，但是代价是我重新做了一遍数据库，所以最近查询速度会有所下降。</span>
+            </div>
+            <div style="text-align:center;"><span id="allCount">总访问数:</span></div>
+        </div>
     </div>
-    <div class="postDiv">
-      <div class="video1">
-        <div class="avbvInput">
-          <div class="spanDiv"><span>AV号或BV号</span></div>
-          <input placeholder="例如170001或BV17x411w7KC" id="videoID" value="" />
-        </div>
-        <div class="pInputDiv">
-          <div class="spanDiv"><span>第几P（默认为1）</span></div>
-          <input id="pInput" value="" />
-        </div>
-      </div>
-      <div class="video2">
-        <div class="keyWords">
-          <div class="spanDiv"><span>关键字</span></div>
-          <input placeholder="下次一定(然而没有人在170001里发下次一定)" id="keyword" value="" />
-        </div>
-      </div>
-      <div class="buttonDiv"><button id="toFind" onclick="toFind()">查询</button></div>
-      <div style="text-align:center;"><span>我做了一次更新，现在能查到一条弹幕对应的多个用户了，但是代价是我重新做了一遍数据库，所以最近查询速度会有所下降。</span>
-      </div>
-      <div style="text-align:center;"><span id="allCount">总访问数:</span></div>
+    <div class="userInfor" id="tbDiv" style="display:none;">
+        <p id="tbDivUseTime" style="text-align:center;"></p>
+        <table border="1" width="95%" style="margin:20px 0 20px 2.5%; ">
+            <tbody id="usTable">
+            </tbody>
+
+
+        </table>
     </div>
-  </div>
-  <div class="userInfor" id="tbDiv" style="display:none;">
-   <p id="tbDivUseTime" style="text-align:center;"></p>
-    <table border="1" width="95%" style="margin:20px 0 20px 2.5%; ">
-      <tbody id="usTable">
-
-      </tbody>
-
-
-    </table>
-  </div>
 
 
 
 
 
-  <script>
-$("#color_div").val(localStorage.getItem("fybgameColor")?localStorage.getItem("fybgameColor"):"#86ffef");
-changeColor();
-function changeColor(){
-$("#main_div").css("background",$("#color_div").val());
-$("#tbDiv").css("background",$("#color_div").val());
-localStorage.setItem("fybgameColor",$("#color_div").val());
-	}
-var isClick = false;
-
-document.onkeydown = function (event) {
-        var e = event || window.event;
-        if (e && e.keyCode == 13) { 
-            $("#toFind").click(); 
+    <script>
+        $("#color_div").val(localStorage.getItem("fybgameColor") ? localStorage.getItem("fybgameColor") : "#86ffef");
+        changeColor();
+        function changeColor() {
+            $("#main_div").css("background", $("#color_div").val());
+            $("#tbDiv").css("background", $("#color_div").val());
+            localStorage.setItem("fybgameColor", $("#color_div").val());
         }
-    };
-    $.ajax({
-      type: "POST",
-      url: "../api/fybgameTools.php",
-      data: {
-        title: document.title
-      },
-      dataType: "json",
-      success: function (result) {
-        $("#allCount").html("总访问数:" + result.msg[0]['count'])
-      },
+        var isClick = false;
 
-    })
-function s_to_hs(s){
-    var h;
-    h  =   Math.floor(s/60);
-    s  =   Math.floor(s)%60;
-
-    return h+':'+s;
-}
-    function getLocalTime(time) {
-      return new Date(parseInt(time) * 1000).toLocaleString().replace(/年|月/g, "-").replace(/日/g, " ");
-    }
-    var a2bEncTable = ["f", "Z", "o", "d", "R", "9", "X", "Q", "D", "S", "U", "m", "2", "1", "y", "C", "k", "r", "6",
-        "z", "B", "q", "i", "v", "e", "Y", "a", "h", "8", "b", "t", "4", "x", "s", "W", "p", "H", "n", "J", "E", "7",
-        "j", "L", "5", "V", "G", "3", "g", "u", "M", "T", "K", "N", "P", "A", "w", "c", "F"
-      ],
-      a2bEncIndex = [11, 10, 3, 8, 4, 6],
-      a2bXorEnc = 177451812,
-      a2bAddEnc = 8728348608;
-
-    function BV2AV(bv) {
-      var tmp = 0;
-      for (var i = 0; i < a2bEncIndex.length; i++) {
-        if (a2bEncTable.indexOf(bv[a2bEncIndex[i]]) === -1) {
-          return "error";
-        } else {
-          tmp += a2bEncTable.indexOf(bv[a2bEncIndex[i]]) * Math.pow(a2bEncTable.length, i);
-        }
-      }
-
-      tmp = tmp - a2bAddEnc ^ a2bXorEnc;
-      return tmp;
-    }
-    
-
-    function toFind() {
-if(!isClick){
-      if ($('#videoID').val() != '' && $('#keyword').val() != '' ) {
-
-        var cidList = [];
-        isClick = true;
-        $("#toFind").html("<img src='../img/loading.gif' style='width:50px;height:50px; display: inline-block;'/>");
-        var cid = 0;
-        var aid = $('#videoID').val();
-        var pInputCount = Number($('#pInput').val());
-        if (aid.indexOf('BV') != -1) {
-          aid = Number(BV2AV(aid))
-        }
-        if ($('#pInput').val() == '') {
-          pInputCount = 1;
-        }
-        $.ajax({
-          type: "GET",
-          url: "https://www.bilibili.com/widget/getPageList",
-          data: {
-            aid: aid
-          },
-          dataType: "json",
-          success: function (result) {
-
-            for (var i = 0; i < result.length; i++) {
-              cidList[i] = result[i];
+        document.onkeydown = function (event) {
+            var e = event || window.event;
+            if (e && e.keyCode == 13) {
+                $("#toFind").click();
             }
-              if (cidList[pInputCount - 1] != undefined) {
-                cid = cidList[pInputCount - 1]['cid'];
-		
-                $.ajax({
-                  type: "POST",
-                  url: "../api/bilibiliUserSend.php",
-                  data: {
-                    av: aid,
-                    p: pInputCount,
-                    keyword: $('#keyword').val()
-                  },
-                  dataType: "json",
-                  success: function (result) {
+        };
+        $.ajax({
+            type: "POST",
+            url: "../api/fybgameTools.php",
+            data: {
+                title: document.title
+            },
+            dataType: "json",
+            success: function (result) {
+                $("#allCount").html("总访问数:" + result.msg[0]['count'])
+            },
 
-                  },
+        })
+        function s_to_hs(s) {
+            var h;
+            h = Math.floor(s / 60);
+            s = Math.floor(s) % 60;
 
-                })
+            return h + ':' + s;
+        }
+        function getLocalTime(time) {
+            return new Date(parseInt(time) * 1000).toLocaleString().replace(/年|月/g, "-").replace(/日/g, " ");
+        }
+        var a2bEncTable = ["f", "Z", "o", "d", "R", "9", "X", "Q", "D", "S", "U", "m", "2", "1", "y", "C", "k", "r", "6",
+            "z", "B", "q", "i", "v", "e", "Y", "a", "h", "8", "b", "t", "4", "x", "s", "W", "p", "H", "n", "J", "E", "7",
+            "j", "L", "5", "V", "G", "3", "g", "u", "M", "T", "K", "N", "P", "A", "w", "c", "F"
+        ],
+            a2bEncIndex = [11, 10, 3, 8, 4, 6],
+            a2bXorEnc = 177451812,
+            a2bAddEnc = 8728348608;
 
-              } else {
-                alert("不存在该P！");
-                $("#toFind").html('查找');
-                isClick = false;
-                return;
-              }
-
-            
-            $.ajax({
-              type: "POST",
-              url: "../api/bilibiliGetUserInfo.php",
-              data: {
-                id: cid,
-                tofind: $('#keyword').val()
-              },
-              dataType: "json",
-              success: function (result) {
-		
-		$("#tbDiv").css("display","block");
-		$("#tbDivUseTime").html("视频AV号："+'<a href=\"https://www.bilibili.com/video/av' + aid +(pInputCount==1?'':'?p='+pInputCount)+ '\"' +
-                    ' target=\"_blank\">'+aid +
-                    '</a></p>'+"\t查询到"+result.msg['id']['one'].length+"个结果 "+"\t总耗时:"+result.msg['useTime']);
-                var key = $('#keyword').val()
-                var str =
-                  "<tr> <td width='10%'>总数</td><td width='40%'>用户发送弹幕</td><td width='7%'>视频中的位置</td><td>发送时间</td><td width='27%'>用户信息</td></tr>"
-                for (var i = 0; i < result.msg['id']['one'].length; i++) {
-		var two = "";
-		var three = "";
-		if(result.msg['id']['two'][i]!=null){
-			two = '或<p><a href=\"https://space.bilibili.com/' + result.msg['id']['two'][i] + '\"' +
-                    ' target=\"_blank\">https://space.bilibili.com/' + result.msg['id']['two'][i] +
-                    '</a></p>';
-			if(result.msg['id']['three'][i]!=null){
-			three = '或<p><a href=\"https://space.bilibili.com/' + result.msg['id']['three'][i] + '\"' +
-                    ' target=\"_blank\">https://space.bilibili.com/' + result.msg['id']['three'][i] +
-                    '</a></p>';
-			}
-		}
-                  str += ('<tr><td>' + (i + 1) + '</td><td>' + result.msg['barrage'][i].replace(new RegExp(
-                      key,
-                      "gm"), "<span style='color:red;'>" + $('#keyword').val() + "</span>") +
-                    '</td><td>' + s_to_hs(result.msg['videoTime'][i]) +'</td><td>' + getLocalTime(result.msg['time'][i]) + '</td><td>' +
-                    '<p><a href=\"https://space.bilibili.com/' + result.msg['id']['one'][i] + '\"' +
-                    ' target=\"_blank\">https://space.bilibili.com/' + result.msg['id']['one'][i] +
-                    '</a></p>'+two+three+'</td></tr>');
-		
+        function BV2AV(bv) {
+            var tmp = 0;
+            for (var i = 0; i < a2bEncIndex.length; i++) {
+                if (a2bEncTable.indexOf(bv[a2bEncIndex[i]]) === -1) {
+                    return "error";
+                } else {
+                    tmp += a2bEncTable.indexOf(bv[a2bEncIndex[i]]) * Math.pow(a2bEncTable.length, i);
                 }
-                $('#usTable').html(str);
-                $("#toFind").html('查找');
-                isClick = false;
-                $.ajax({
-                  type: "POST",
-                  url: "../api/fybgameTools.php",
-                  data: {
-                    title: document.title
-                  },
-                  dataType: "json",
-                  success: function (result) {
-                    $("#allCount").html("总访问数:" + result.msg[0]['count'])
-                  },
+            }
 
-                })
+            tmp = tmp - a2bAddEnc ^ a2bXorEnc;
+            return tmp;
+        }
 
-              },
 
-            })
-          },
-          error: function (err) {
-            alert("av号或bv号错误")
-            $("#toFind").html('查找');
-            isClick = false;
-          }
+        function toFind() {
+            if (!isClick) {
+                if ($('#videoID').val() != '' && $('#keyword').val() != '') {
 
-        });
+                    var cidList = [];
+                    isClick = true;
+                    $("#toFind").html("<img src='../img/loading.gif' style='width:50px;height:50px; display: inline-block;'/>");
+                    var cid = 0;
+                    var aid = $('#videoID').val();
+                    var pInputCount = Number($('#pInput').val());
+                    if (aid.indexOf('BV') != -1) {
+                        aid = Number(BV2AV(aid))
+                    }
+                    if ($('#pInput').val() == '') {
+                        pInputCount = 1;
+                    }
+                    $.ajax({
+                        type: "GET",
+                        url: "https://www.bilibili.com/widget/getPageList",
+                        data: {
+                            aid: aid
+                        },
+                        dataType: "json",
+                        success: function (result) {
 
-      }
-	else{
-	alert('请输入AV/BV号或想要查找的关键词！')
-	}
-}
+                            for (var i = 0; i < result.length; i++) {
+                                cidList[i] = result[i];
+                            }
+                            if (cidList[pInputCount - 1] != undefined) {
+                                cid = cidList[pInputCount - 1]['cid'];
 
-    }
-  </script>
+                                $.ajax({
+                                    type: "POST",
+                                    url: "../api/bilibiliUserSend.php",
+                                    data: {
+                                        av: aid,
+                                        p: pInputCount,
+                                        keyword: $('#keyword').val()
+                                    },
+                                    dataType: "json",
+                                    success: function (result) {
+
+                                    },
+
+                                })
+
+                            } else {
+                                alert("不存在该P！");
+                                $("#toFind").html('查找');
+                                isClick = false;
+                                return;
+                            }
+
+
+                            $.ajax({
+                                type: "POST",
+                                url: "../api/bilibiliGetUserInfo.php",
+                                data: {
+                                    id: cid,
+                                    tofind: $('#keyword').val()
+                                },
+                                dataType: "json",
+                                success: function (result) {
+
+                                    $("#tbDiv").css("display", "block");
+                                    $("#tbDivUseTime").html("视频AV号：" + '<a href=\"https://www.bilibili.com/video/av' + aid + (pInputCount == 1 ? '' : '?p=' + pInputCount) + '\"' +
+                                        ' target=\"_blank\">' + aid +
+                                        '</a></p>' + "\t查询到" + result.msg['id']['one'].length + "个结果 " + "\t总耗时:" + result.msg['useTime']);
+                                    var key = $('#keyword').val()
+                                    var str =
+                                        "<tr> <td width='10%'>总数</td><td width='40%'>用户发送弹幕</td><td width='7%'>视频中的位置</td><td>发送时间</td><td width='27%'>用户信息</td></tr>"
+                                    for (var i = 0; i < result.msg['id']['one'].length; i++) {
+                                        var two = "";
+                                        var three = "";
+                                        if (result.msg['id']['two'][i] != null) {
+                                            two = '或<p><a href=\"https://space.bilibili.com/' + result.msg['id']['two'][i] + '\"' +
+                                                ' target=\"_blank\">https://space.bilibili.com/' + result.msg['id']['two'][i] +
+                                                '</a></p>';
+                                            if (result.msg['id']['three'][i] != null) {
+                                                three = '或<p><a href=\"https://space.bilibili.com/' + result.msg['id']['three'][i] + '\"' +
+                                                    ' target=\"_blank\">https://space.bilibili.com/' + result.msg['id']['three'][i] +
+                                                    '</a></p>';
+                                            }
+                                        }
+                                        str += ('<tr><td>' + (i + 1) + '</td><td>' + result.msg['barrage'][i].replace(new RegExp(
+                                            key,
+                                            "gm"), "<span style='color:red;'>" + $('#keyword').val() + "</span>") +
+                                            '</td><td>' + s_to_hs(result.msg['videoTime'][i]) + '</td><td>' + getLocalTime(result.msg['time'][i]) + '</td><td>' +
+                                            '<p><a href=\"https://space.bilibili.com/' + result.msg['id']['one'][i] + '\"' +
+                                            ' target=\"_blank\">https://space.bilibili.com/' + result.msg['id']['one'][i] +
+                                            '</a></p>' + two + three + '</td></tr>');
+
+                                    }
+                                    $('#usTable').html(str);
+                                    $("#toFind").html('查找');
+                                    isClick = false;
+                                    $.ajax({
+                                        type: "POST",
+                                        url: "../api/fybgameTools.php",
+                                        data: {
+                                            title: document.title
+                                        },
+                                        dataType: "json",
+                                        success: function (result) {
+                                            $("#allCount").html("总访问数:" + result.msg[0]['count'])
+                                        },
+
+                                    })
+
+                                },
+
+                            })
+                        },
+                        error: function (err) {
+                            alert("av号或bv号错误")
+                            $("#toFind").html('查找');
+                            isClick = false;
+                        }
+
+                    });
+
+                }
+                else {
+                    alert('请输入AV/BV号或想要查找的关键词！')
+                }
+            }
+
+        }
+    </script>
 
 </body>
 
